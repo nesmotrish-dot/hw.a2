@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Homework — Module 4A (Spotlight 4)</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Comic Sans MS', 'Segoe UI', Arial, sans-serif;
+    background: #f0f7ff;
+    color: #2c3e50;
+    margin: 0;
+    padding: 16px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  h1 {
+    text-align: center;
+    color: #2980b9;
+    font-size: 24px;
+    margin: 0 0 4px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #7f8c8d;
+    margin: 0 0 20px;
+    font-size: 14px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.07);
+    border-left: 6px solid #3498db;
+  }
+  .card h2 {
+    font-size: 18px;
+    margin: 0 0 6px;
+    color: #2980b9;
+  }
+  .task-desc {
+    font-size: 14px;
+    color: #7f8c8d;
+    margin: 0 0 14px;
+  }
+
+  .word-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 10px;
+  }
+  .word-card {
+    background: #f7fbff;
+    border: 2px solid #d6e6f2;
+    border-radius: 14px;
+    padding: 12px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+  }
+  .word-card:hover { border-color: #3498db; }
+  .word-card .en {
+    font-size: 17px;
+    font-weight: bold;
+    color: #2980b9;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .word-card .ru {
+    font-size: 13px;
+    color: #95a5a6;
+    display: block;
+    min-height: 18px;
+    transition: color .3s;
+  }
+  .word-card .ru.show { color: #e67e22; font-weight: bold; }
+  .word-card .speaker {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-size: 15px;
+    opacity: 0.6;
+  }
+  .word-card.playing { border-color: #e67e22; background: #fff8e1; }
+
+  .memo {
+    background: linear-gradient(135deg, #eafaf1 0%, #f0f9ff 100%);
+    border-left: 6px solid #27ae60;
+  }
+  .memo h2 { color: #27ae60; }
+  .memo p { margin: 8px 0; font-size: 15px; }
+  .memo .example {
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 8px 0;
+    border-left: 4px solid #f1c40f;
+    font-size: 15px;
+  }
+  .memo b { color: #27ae60; }
+
+  .sort-pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 60px;
+    padding: 10px;
+    background: #f9fcff;
+    border-radius: 10px;
+    margin-bottom: 14px;
+  }
+  .sort-word {
+    background: #fff;
+    border: 2px solid #3498db;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 15px;
+    font-weight: bold;
+    color: #2980b9;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .sort-word.selected {
+    background: #ffe9a8;
+    border-color: #f39c12;
+    transform: scale(1.05);
+  }
+  .sort-word.shake { animation: shake .35s; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  .sort-columns { display: flex; gap: 12px; flex-wrap: wrap; }
+  .sort-col {
+    flex: 1;
+    min-width: 200px;
+    background: #eef4fa;
+    border: 3px dashed #d0dde8;
+    border-radius: 14px;
+    padding: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .sort-col:hover { border-color: #3498db; background: #e3eef7; }
+  .sort-col h3 {
+    font-size: 16px;
+    margin: 0 0 8px;
+    color: #2980b9;
+  }
+  .sort-col .items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    min-height: 30px;
+  }
+  .sort-col .placed {
+    background: #d4f5e0;
+    border: 2px solid #27ae60;
+    color: #27ae60;
+    border-radius: 16px;
+    padding: 4px 10px;
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  .sentence-task {
+    margin-bottom: 20px;
+    padding: 12px;
+    background: #f9fcff;
+    border-radius: 12px;
+  }
+  .sentence-num {
+    font-size: 14px;
+    color: #7f8c8d;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+  .word-pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 50px;
+    padding: 8px;
+    background: #fff;
+    border-radius: 10px;
+    border: 2px solid #e0ecf5;
+    margin-bottom: 10px;
+  }
+  .drag-word {
+    background: #eef4fa;
+    border: 2px solid #3498db;
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #2980b9;
+    cursor: grab;
+    transition: all .15s;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .drag-word:active { cursor: grabbing; }
+  .drag-word.placed {
+    background: #d4f5e0;
+    border-color: #27ae60;
+    color: #27ae60;
+  }
+  .drag-word.correct-pos {
+    background: #d4f5e0;
+    border-color: #27ae60;
+    color: #27ae60;
+  }
+  .drag-word.wrong-pos {
+    background: #fdedec;
+    border-color: #e74c3c;
+    color: #e74c3c;
+  }
+  .dropzone {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 54px;
+    padding: 8px;
+    background: #fff8e1;
+    border-radius: 10px;
+    border: 2px dashed #f1c40f;
+  }
+  .dropzone.correct { border-color: #27ae60; background: #eafaf1; border-style: solid; }
+  .dropzone.wrong { border-color: #e74c3c; background: #fdedec; border-style: solid; }
+
+  .ghost {
+    opacity: 0.9;
+    transform: scale(1.05);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+  }
+
+  .btn {
+    background: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .2s;
+    margin-top: 6px;
+  }
+  .btn:hover { background: #2980b9; }
+  .btn.reset { background: #95a5a6; margin-left: 8px; }
+  .btn.reset:hover { background: #7f8c8d; }
+
+  .result {
+    margin-top: 12px;
+    font-weight: bold;
+    font-size: 15px;
+    min-height: 22px;
+  }
+  .result.good { color: #27ae60; }
+  .result.bad { color: #e74c3c; }
+  .result.mid { color: #e67e22; }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 20px; }
+    .card { padding: 14px; }
+    .word-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Module 4A</h1>
+  <p class="subtitle">Домашняя работа · Spotlight 4</p>
+
+  <div class="card">
+    <h2>1. Days of the week</h2>
+    <p class="task-desc">
+      Нажми на карточку — услышишь слово и увидишь перевод.
+    </p>
+    <div class="word-grid" id="daysGrid"></div>
+  </div>
+
+  <div class="card">
+    <h2>2. Sports</h2>
+    <p class="task-desc">
+      Нажми на карточку — услышишь слово и увидишь перевод.
+    </p>
+    <div class="word-grid" id="sportsGrid"></div>
+  </div>
+
+  <div class="card memo">
+    <h2>📘 Памятка: предлог on с днями недели</h2>
+    <p><b>Перед днём недели всегда ставим предлог on:</b></p>
+    <div class="example">
+      <b>on Monday</b> — в понедельник<br>
+      <b>on Sunday</b> — в воскресенье
+    </div>
+    <p><b>Если действие повторяется каждую неделю</b>, день стоит во множественном числе:</p>
+    <div class="example">
+      <b>on Mondays</b> — по понедельникам<br>
+      <b>on Fridays</b> — по пятницам
+    </div>
+    <p><b>Пример:</b></p>
+    <div class="example">
+      I play hockey <b>on Mondays</b>. — Я играю в хоккей по понедельникам.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>3. Days or sports?</h2>
+    <p class="task-desc">
+      Нажми на слово, а потом на нужную колонку. Если верно — слово станет зелёным и «улетит» в колонку.
+    </p>
+    <div class="sort-pool" id="sortPool"></div>
+    <div class="sort-columns">
+      <div class="sort-col" id="colDays">
+        <h3>📅 Days</h3>
+        <div class="items" id="itemsDays"></div>
+      </div>
+      <div class="sort-col" id="colSports">
+        <h3>⚽ Sports</h3>
+        <div class="items" id="itemsSports"></div>
+      </div>
+    </div>
+    <button class="btn reset" onclick="resetSort()">Сбросить</button>
+    <div class="result" id="sortResult"></div>
+  </div>
+
+  <div class="card">
+    <h2>4. Расставь слова в правильном порядке</h2>
+    <p class="task-desc">
+      Слова-маркеры: <b>usually, always, often, sometimes, never</b> — они стоят перед глаголом.<br>
+      Перетащи слова из верхнего поля в нижнее, чтобы получилось правильное предложение.
+      Нажми на слово в нижнем поле, чтобы вернуть его обратно.
+    </p>
+    <div id="sentenceBox"></div>
+    <button class="btn" onclick="checkSentences()">Проверить всё</button>
+    <button class="btn reset" onclick="resetSentences()">Сбросить</button>
+    <div class="result" id="sentResult"></div>
+  </div>
+
+</div>
+
+<script>
+const daysData = [
+  { en: 'Monday',    ru: 'понедельник' },
+  { en: 'Tuesday',   ru: 'вторник' },
+  { en: 'Wednesday', ru: 'среда' },
+  { en: 'Thursday',  ru: 'четверг' },
+  { en: 'Friday',    ru: 'пятница' },
+  { en: 'Saturday',  ru: 'суббота' },
+  { en: 'Sunday',    ru: 'воскресенье' }
+];
+
+const sportsData = [
+  { en: 'volleyball',   ru: 'волейбол' },
+  { en: 'tennis',       ru: 'теннис' },
+  { en: 'badminton',    ru: 'бадминтон' },
+  { en: 'baseball',     ru: 'бейсбол' },
+  { en: 'table tennis', ru: 'настольный теннис' },
+  { en: 'hockey',       ru: 'хоккей' }
+];
+
+const sortItems = [
+  { en: 'Monday',     type: 'day'   },
+  { en: 'Wednesday',  type: 'day'   },
+  { en: 'Friday',     type: 'day'   },
+  { en: 'Saturday',   type: 'day'   },
+  { en: 'Sunday',     type: 'day'   },
+  { en: 'volleyball', type: 'sport' },
+  { en: 'tennis',     type: 'sport' },
+  { en: 'badminton',  type: 'sport' },
+  { en: 'hockey',     type: 'sport' },
+  { en: 'baseball',   type: 'sport' }
+];
+
+const sentences = [
+  { correct: ['Tim', 'never', 'watches', 'TV'] },
+  { correct: ['I', 'usually', 'play', 'hockey'] },
+  { correct: ['She', 'often', 'plays', 'tennis'] },
+  { correct: ['We', 'sometimes', 'play', 'volleyball'] },
+  { correct: ['He', 'always', 'plays', 'baseball'] }
+];
+
+function speak(text, cardEl) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-GB';
+  u.rate = 0.8;
+  if (cardEl) {
+    cardEl.classList.add('playing');
+    u.onend = () => cardEl.classList.remove('playing');
+  }
+  window.speechSynthesis.speak(u);
+}
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildWordCards(gridId, data) {
+  const grid = document.getElementById(gridId);
+  grid.innerHTML = '';
+  data.forEach(w => {
+    const card = document.createElement('div');
+    card.className = 'word-card';
+    card.innerHTML = `
+      <span class="speaker">🔊</span>
+      <span class="en">${w.en}</span>
+      <span class="ru">${w.ru}</span>
+    `;
+    card.onclick = () => {
+      speak(w.en, card);
+      card.querySelector('.ru').classList.add('show');
+    };
+    grid.appendChild(card);
+  });
+}
+buildWordCards('daysGrid', daysData);
+buildWordCards('sportsGrid', sportsData);
+
+let selectedSort = null;
+let sortPlaced = 0;
+
+function buildSort() {
+  selectedSort = null;
+  sortPlaced = 0;
+  const pool = document.getElementById('sortPool');
+  pool.innerHTML = '';
+  document.getElementById('itemsDays').innerHTML = '';
+  document.getElementById('itemsSports').innerHTML = '';
+  document.getElementById('sortResult').textContent = '';
+
+  shuffle(sortItems).forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'sort-word';
+    el.textContent = item.en;
+    el.dataset.type = item.type;
+    el.onclick = (e) => {
+      e.stopPropagation();
+      document.querySelectorAll('.sort-word.selected').forEach(x => x.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedSort = el;
+    };
+    pool.appendChild(el);
+  });
+}
+
+function placeSort(type) {
+  if (!selectedSort) return;
+  const el = selectedSort;
+  if (el.dataset.type === type) {
+    el.classList.remove('selected');
+    const target = type === 'day' ? 'itemsDays' : 'itemsSports';
+    const chip = document.createElement('span');
+    chip.className = 'placed';
+    chip.textContent = el.textContent;
+    document.getElementById(target).appendChild(chip);
+    el.remove();
+    selectedSort = null;
+    sortPlaced++;
+    if (sortPlaced === sortItems.length) {
+      const r = document.getElementById('sortResult');
+      r.className = 'result good';
+      r.textContent = '🎉 Отлично! Все слова разложены верно!';
+    }
+  } else {
+    el.classList.add('shake');
+    setTimeout(() => el.classList.remove('shake'), 400);
+  }
+}
+
+document.getElementById('colDays').onclick = () => placeSort('day');
+document.getElementById('colSports').onclick = () => placeSort('sport');
+
+function resetSort() { buildSort(); }
+buildSort();
+
+function clearPosClasses(scope) {
+  (scope || document).querySelectorAll('.drag-word.correct-pos, .drag-word.wrong-pos')
+    .forEach(el => el.classList.remove('correct-pos', 'wrong-pos'));
+}
+
+function attachDrag(wordEl, pool, dropzone) {
+  let dragMoved = false;
+
+  wordEl.addEventListener('pointerdown', (e) => {
+    if (wordEl.classList.contains('placed')) {
+      dragMoved = false;
+      return;
+    }
+    e.preventDefault();
+    dragMoved = false;
+    clearPosClasses(wordEl.parentElement.parentElement);
+    try { wordEl.setPointerCapture(e.pointerId); } catch (err) {}
+
+    const rect = wordEl.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
+
+    const ghost = wordEl.cloneNode(true);
+    ghost.classList.add('ghost');
+    ghost.style.position = 'fixed';
+    ghost.style.pointerEvents = 'none';
+    ghost.style.zIndex = '9999';
+    ghost.style.left = rect.left + 'px';
+    ghost.style.top = rect.top + 'px';
+    ghost.style.width = rect.width + 'px';
+    document.body.appendChild(ghost);
+    wordEl.style.opacity = '0.3';
+
+    const move = (ev) => {
+      dragMoved = true;
+      ghost.style.left = (ev.clientX - offsetX) + 'px';
+      ghost.style.top = (ev.clientY - offsetY) + 'px';
+    };
+
+    const end = (ev) => {
+      wordEl.removeEventListener('pointermove', move);
+      wordEl.removeEventListener('pointerup', end);
+      wordEl.removeEventListener('pointercancel', end);
+      ghost.remove();
+      wordEl.style.opacity = '';
+
+      const dzRect = dropzone.getBoundingClientRect();
+      if (ev.clientX >= dzRect.left && ev.clientX <= dzRect.right &&
+          ev.clientY >= dzRect.top && ev.clientY <= dzRect.bottom) {
+        dropzone.appendChild(wordEl);
+        wordEl.classList.add('placed');
+      }
+    };
+
+    wordEl.addEventListener('pointermove', move);
+    wordEl.addEventListener('pointerup', end);
+    wordEl.addEventListener('pointercancel', end);
+  });
+
+  wordEl.addEventListener('click', () => {
+    if (dragMoved) return;
+    if (wordEl.classList.contains('placed')) {
+      clearPosClasses(wordEl.parentElement.parentElement);
+      wordEl.classList.remove('placed');
+      pool.appendChild(wordEl);
+    }
+  });
+}
+
+function buildSentences() {
+  const box = document.getElementById('sentenceBox');
+  box.innerHTML = '';
+
+  sentences.forEach((s, i) => {
+    const task = document.createElement('div');
+    task.className = 'sentence-task';
+    task.dataset.index = i;
+
+    const num = document.createElement('div');
+    num.className = 'sentence-num';
+    num.textContent = `Предложение ${i + 1}`;
+    task.appendChild(num);
+
+    const pool = document.createElement('div');
+    pool.className = 'word-pool';
+    const dropzone = document.createElement('div');
+    dropzone.className = 'dropzone';
+
+    shuffle(s.correct).forEach(w => {
+      const el = document.createElement('div');
+      el.className = 'drag-word';
+      el.textContent = w;
+      el.dataset.word = w;
+      attachDrag(el, pool, dropzone);
+      pool.appendChild(el);
+    });
+
+    task.appendChild(pool);
+    task.appendChild(dropzone);
+    box.appendChild(task);
+  });
+
+  document.getElementById('sentResult').textContent = '';
+}
+
+function checkSentences() {
+  let ok = 0;
+  const tasks = document.querySelectorAll('.sentence-task');
+  tasks.forEach((task, i) => {
+    const dropzone = task.querySelector('.dropzone');
+    const placedEls = [...dropzone.querySelectorAll('.drag-word')];
+    const placed = placedEls.map(el => el.dataset.word);
+    dropzone.classList.remove('correct', 'wrong');
+
+    placedEls.forEach(el => el.classList.remove('correct-pos', 'wrong-pos'));
+
+    if (placed.length !== sentences[i].correct.length) return;
+
+    let allCorrect = true;
+    placedEls.forEach((el, j) => {
+      if (sentences[i].correct[j] === el.dataset.word) {
+        el.classList.add('correct-pos');
+      } else {
+        el.classList.add('wrong-pos');
+        allCorrect = false;
+      }
+    });
+
+    if (allCorrect) { dropzone.classList.add('correct'); ok++; }
+    else { dropzone.classList.add('wrong'); }
+  });
+
+  const r = document.getElementById('sentResult');
+  if (ok === sentences.length) {
+    r.className = 'result good';
+    r.textContent = '🎉 Молодец! Все предложения составлены верно!';
+  } else if (ok === 0) {
+    r.className = 'result bad';
+    r.textContent = 'Пока ни одного верного. Красные слова стоят не на своём месте.';
+  } else {
+    r.className = 'result mid';
+    r.textContent = `Верно ${ok} из ${sentences.length}. Красные слова стоят не на своём месте.`;
+  }
+}
+
+function resetSentences() { buildSentences(); }
+buildSentences();
+</script>
+</body>
+</html>
